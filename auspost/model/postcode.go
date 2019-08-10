@@ -3,7 +3,23 @@ package model
 import "encoding/json"
 
 type PostcodeSearchResult struct {
-	Localities Localities `json:"localities"`
+	RawLocalitiesWrapper struct {
+		RawLocalities json.RawMessage `json:"localities"`
+	}
+	Localities Localities `json:"-"`
+}
+
+func (r *PostcodeSearchResult) UnmarshalJSON(b []byte) error {
+	if err := json.Unmarshal(b, &r.RawLocalitiesWrapper); err != nil {
+		return err
+	}
+
+	// Empty results come back as a string?!?
+	if r.RawLocalitiesWrapper.RawLocalities[0] != '"' {
+		return json.Unmarshal(r.RawLocalitiesWrapper.RawLocalities, &r.Localities)
+	}
+
+	return nil
 }
 
 type Localities struct {
@@ -17,6 +33,8 @@ func (l *Localities) UnmarshalJSON(b []byte) error {
 	if err := json.Unmarshal(b, &l.RawLocalityWrapper); err != nil {
 		return err
 	}
+
+	// Single result comes back not as an array?!?
 	if l.RawLocalityWrapper.RawLocality[0] == '[' {
 		return json.Unmarshal(l.RawLocalityWrapper.RawLocality, &l.Locality)
 	}
