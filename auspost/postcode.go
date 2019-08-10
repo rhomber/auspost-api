@@ -12,7 +12,7 @@ const (
 	ausPostUriPostcodeSearch = "postcode/search.json"
 )
 
-func (c *Client) PostcodeSearch(q string, state string, excludePostboxFlag bool) (model.PostcodeSearchResult, error) {
+func (c *Client) PostcodeSearch(q string, state string, excludePostboxFlag bool) ([]model.Locality, error) {
 	req := c.restClient.R()
 
 	if c.trace {
@@ -33,12 +33,12 @@ func (c *Client) PostcodeSearch(q string, state string, excludePostboxFlag bool)
 	}
 
 	if err != nil {
-		return model.PostcodeSearchResult{}, err
+		return nil, err
 	}
 
 	if r, ok := resp.Result().(*model.PostcodeSearchResult); ok {
-		return *r, nil
+		return r.Localities.Locality, nil
 	}
 
-	return model.PostcodeSearchResult{}, ErrInvalidResult
+	return nil, ErrInvalidResult
 }
