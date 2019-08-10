@@ -26,8 +26,15 @@ func NewClient(apiKey string, baseUrl string) *Client {
 type Client struct {
 	restClient *resty.Client
 	baseUrl    string
+	trace      bool
 }
 
 func (c *Client) getUrl(uri string) string {
 	return fmt.Sprintf("%s/%s", c.baseUrl, uri)
+}
+
+func (c *Client) EnableTrace() *Client {
+	c.trace = true
+
+	return c
 }
