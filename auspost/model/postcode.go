@@ -1,11 +1,34 @@
 package model
 
+import "encoding/json"
+
 type PostcodeSearchResult struct {
 	Localities Localities `json:"localities"`
 }
 
 type Localities struct {
-	Locality []Locality `json:"locality"`
+	RawLocalityWrapper struct {
+		RawLocality json.RawMessage `json:"locality"`
+	}
+	Locality []Locality `json:"-"`
+}
+
+func (l *Localities) UnmarshalJSON(b []byte) error {
+	if err := json.Unmarshal(b, &l.RawLocalityWrapper); err != nil {
+		return err
+	}
+	if l.RawLocalityWrapper.RawLocality[0] == '[' {
+		return json.Unmarshal(l.RawLocalityWrapper.RawLocality, &l.Locality)
+	}
+
+	var loc Locality
+	if err := json.Unmarshal(l.RawLocalityWrapper.RawLocality, &loc); err != nil {
+		return err
+	}
+
+	l.Locality = []Locality{loc}
+
+	return nil
 }
 
 type Locality struct {
