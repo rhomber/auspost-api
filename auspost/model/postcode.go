@@ -14,6 +14,6 @@ type Locality struct {
 	Latitude  float64 `json:"latitude"`
 	Longitude float64 `json:"longitude"`
 	Location  string  `json:"location"`
-	Postcode  string  `json:"postcode"`
+	Postcode  int     `json:"postcode"`
 	State     string  `json:"state"`
 }
