@@ -37,7 +37,12 @@ func (c *Client) PostcodeSearch(q string, state string, excludePostboxFlag bool)
 	}
 
 	if r, ok := resp.Result().(*model.PostcodeSearchResult); ok {
-		return r.Localities.Locality, nil
+		res := make([]model.Locality, 0)
+		for _, loc := range r.Localities.Locality {
+			res = append(res, model.LocalityRawToLocality(loc))
+		}
+
+		return res, nil
 	}
 
 	return nil, ErrInvalidResult
